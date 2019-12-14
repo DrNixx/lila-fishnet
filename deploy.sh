@@ -31,6 +31,8 @@ echo "$rsync_command"
 $rsync_command
 echo "rsync complete"
 
+ssh $REMOTE "chown -R lichess:lichess $REMOTE_DIR
+
 read -n 1 -p "Press [Enter] to continue."
 
 echo "Restart lila-fishnet"
