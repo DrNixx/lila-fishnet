@@ -1,9 +1,8 @@
 package lila.fishnet
 
 import org.joda.time.DateTime
-
-import chess.format.{ FEN, Uci }
 import chess.variant.Variant
+import chess.format.FEN
 
 sealed trait Work {
   def _id: Work.Id
@@ -61,16 +60,17 @@ object Work {
       createdAt: DateTime
   ) extends Work {
 
-    def assignTo(clientKey: ClientKey) = copy(
-      acquired = Some(
-        Acquired(
-          clientKey = clientKey,
-          date = DateTime.now
-        )
-      ),
-      lastTryByKey = Some(clientKey),
-      tries = tries + 1
-    )
+    def assignTo(clientKey: ClientKey) =
+      copy(
+        acquired = Some(
+          Acquired(
+            clientKey = clientKey,
+            date = DateTime.now
+          )
+        ),
+        lastTryByKey = Some(clientKey),
+        tries = tries + 1
+      )
 
     def timeout = copy(acquired = None)
     def invalid = copy(acquired = None)
