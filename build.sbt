@@ -1,33 +1,64 @@
 name := "lila-fishnet"
 
-version := "1.0-SNAPSHOT"
+version := "2.0"
 
 maintainer := "lichess.org"
 
-lazy val root = (project in file("."))
+lazy val root = Project("lila-fishnet", file("."))
   .enablePlugins(PlayScala, PlayNettyServer)
-  .disablePlugins(PlayFilters, PlayAkkaHttpServer)
+  .disablePlugins(PlayAkkaHttpServer)
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.3"
+resourceDirectory in Compile := baseDirectory.value / "conf"
 
-val kamonVersion = "2.0.2"
+val kamonVersion = "2.1.6"
 
-libraryDependencies += guice
-libraryDependencies += "io.lettuce"  % "lettuce-core"                 % "5.2.1.RELEASE"
-libraryDependencies += "io.netty"    % "netty-transport-native-epoll" % "4.1.43.Final" classifier "linux-x86_64"
-libraryDependencies += "joda-time"   % "joda-time"                    % "2.10.5"
-libraryDependencies += "org.lichess" %% "scalachess"                  % "9.0.27"
-libraryDependencies += "io.kamon"    %% "kamon-core"                  % kamonVersion
-libraryDependencies += "io.kamon"    %% "kamon-influxdb"              % "2.0.1-LILA"
-libraryDependencies += "io.kamon"    %% "kamon-system-metrics"        % "2.0.0"
+libraryDependencies += "io.lettuce"   % "lettuce-core"                 % "5.3.4.RELEASE"
+libraryDependencies += "io.netty"     % "netty-transport-native-epoll" % "4.1.52.Final" classifier "linux-x86_64"
+libraryDependencies += "joda-time"    % "joda-time"                    % "2.10.6"
+libraryDependencies += "org.lichess" %% "scalachess"                   % "10.0.1"
+libraryDependencies += "io.kamon"    %% "kamon-core"                   % kamonVersion
+libraryDependencies += "io.kamon"    %% "kamon-influxdb"               % kamonVersion
+libraryDependencies += "io.kamon"    %% "kamon-system-metrics"         % kamonVersion
 
 resolvers += "lila-maven" at "https://raw.githubusercontent.com/ornicar/lila-maven/master"
 
 scalacOptions ++= Seq(
-  "-language:implicitConversions",
-  "-feature",
-  "-deprecation",
-  "-Xfatal-warnings"
+    "-explaintypes",
+    "-feature",
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-language:postfixOps",
+    "-Ymacro-annotations",
+    // Warnings as errors!
+    // "-Xfatal-warnings",
+    // Linting options
+    "-unchecked",
+    "-Xcheckinit",
+    "-Xlint:adapted-args",
+    "-Xlint:constant",
+    "-Xlint:delayedinit-select",
+    "-Xlint:deprecation",
+    "-Xlint:inaccessible",
+    "-Xlint:infer-any",
+    "-Xlint:missing-interpolator",
+    "-Xlint:nullary-unit",
+    "-Xlint:option-implicit",
+    "-Xlint:package-object-classes",
+    "-Xlint:poly-implicit-overload",
+    "-Xlint:private-shadow",
+    "-Xlint:stars-align",
+    "-Xlint:type-parameter-shadow",
+    "-Wdead-code",
+    "-Wextra-implicit",
+    "-Wnumeric-widen",
+    "-Wunused:imports",
+    "-Wunused:locals",
+    "-Wunused:patvars",
+    "-Wunused:privates",
+    "-Wunused:implicits",
+    "-Wunused:params",
+    /* "-Wvalue-discard" */
 )
 
 sources in (Compile, doc) := Seq.empty

@@ -1,6 +1,5 @@
 package lila.fishnet
 
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 import chess.format.{ FEN, Uci }
@@ -36,12 +35,13 @@ object JsonApi {
       moves: String
   )
 
-  def fromGame(g: W.Game) = Game(
-    game_id = g.id,
-    position = g.initialFen | FEN(g.variant.initialFen),
-    variant = g.variant,
-    moves = g.moves
-  )
+  def fromGame(g: W.Game) =
+    Game(
+      game_id = g.id,
+      position = g.initialFen | FEN(g.variant.initialFen),
+      variant = g.variant,
+      moves = g.moves
+    )
 
   sealed trait Work {
     val id: String
@@ -57,7 +57,6 @@ object JsonApi {
   def moveFromWork(m: Work.Move) = Move(m.id.value, m.level, fromGame(m.game), m.clock)
 
   object readers {
-    import play.api.libs.functional.syntax._
     implicit val ClientKeyReads  = Reads.of[String].map(new ClientKey(_))
     implicit val FishnetReads    = Json.reads[Request.Fishnet]
     implicit val AcquireReads    = Json.reads[Request.Acquire]
@@ -66,17 +65,11 @@ object JsonApi {
   }
 
   object writers {
-    implicit val VariantWrites = Writes[Variant] { v =>
-      JsString(v.key)
-    }
-    implicit val FENWrites = Writes[FEN] { fen =>
-      JsString(fen.value)
-    }
+    implicit val VariantWrites                   = Writes[Variant] { v => JsString(v.key) }
+    implicit val FENWrites                       = Writes[FEN] { fen => JsString(fen.value) }
     implicit val GameWrites: Writes[Game]        = Json.writes[Game]
     implicit val ClockWrites: Writes[Work.Clock] = Json.writes[Work.Clock]
-    implicit val WorkIdWrites = Writes[Work.Id] { id =>
-      JsString(id.value)
-    }
+    implicit val WorkIdWrites                    = Writes[Work.Id] { id => JsString(id.value) }
     implicit val WorkWrites = OWrites[Work] { work =>
       (work match {
         case m: Move =>

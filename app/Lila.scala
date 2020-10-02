@@ -3,14 +3,11 @@ package lila.fishnet
 import chess.format.{ FEN, Uci }
 import io.lettuce.core._
 import io.lettuce.core.pubsub._
-import javax.inject._
 import org.joda.time.DateTime
 import play.api.Configuration
-import play.api.libs.json._
 import play.api.Logger
 
-@Singleton
-final class Lila @Inject() (
+final class Lila(
     moveDb: MoveDb,
     config: Configuration
 ) {
@@ -33,9 +30,7 @@ final class Lila @Inject() (
         }
     })
 
-    connOut.async.subscribe(chanOut) thenRun { () =>
-      connIn.async.publish(chanIn, "start")
-    }
+    connOut.async.subscribe(chanOut) thenRun { () => connIn.async.publish(chanIn, "start") }
 
     send
   }
@@ -49,38 +44,40 @@ object Lila {
     def write = s"$gameId $ply ${uci.uci}"
   }
 
-  def readMoveReq(msg: String): Option[Work.Move] = msg.split(";", 6) match {
-    case Array(gameId, levelS, clockS, variantS, initialFenS, moves) =>
-      for {
-        level <- parseIntOption(levelS)
-        variant    = chess.variant.Variant.orDefault(variantS)
-        initialFen = if (initialFenS.isEmpty) None else Some(FEN(initialFenS))
-        clock      = readClock(clockS)
-      } yield Work.Move(
-        _id = Work.makeId,
-        game = Work.Game(
-          id = gameId,
-          initialFen = initialFen,
-          variant = variant,
-          moves = moves
-        ),
-        level = level,
-        clock = clock,
-        tries = 0,
-        lastTryByKey = None,
-        acquired = None,
-        createdAt = DateTime.now
-      )
-    case _ => None
-  }
+  def readMoveReq(msg: String): Option[Work.Move] =
+    msg.split(";", 6) match {
+      case Array(gameId, levelS, clockS, variantS, initialFenS, moves) =>
+        for {
+          level <- parseIntOption(levelS)
+          variant    = chess.variant.Variant.orDefault(variantS)
+          initialFen = if (initialFenS.isEmpty) None else Some(FEN(initialFenS))
+          clock      = readClock(clockS)
+        } yield Work.Move(
+          _id = Work.makeId,
+          game = Work.Game(
+            id = gameId,
+            initialFen = initialFen,
+            variant = variant,
+            moves = moves
+          ),
+          level = level,
+          clock = clock,
+          tries = 0,
+          lastTryByKey = None,
+          acquired = None,
+          createdAt = DateTime.now
+        )
+      case _ => None
+    }
 
-  def readClock(s: String) = s split ' ' match {
-    case Array(ws, bs, incs) =>
-      for {
-        wtime <- parseIntOption(ws)
-        btime <- parseIntOption(bs)
-        inc   <- parseIntOption(incs)
-      } yield Work.Clock(wtime, btime, inc)
-    case _ => None
-  }
+  def readClock(s: String) =
+    s split ' ' match {
+      case Array(ws, bs, incs) =>
+        for {
+          wtime <- parseIntOption(ws)
+          btime <- parseIntOption(bs)
+          inc   <- parseIntOption(incs)
+        } yield Work.Clock(wtime, btime, inc)
+      case _ => None
+    }
 }
